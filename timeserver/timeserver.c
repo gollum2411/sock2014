@@ -9,30 +9,11 @@
 #include <unistd.h>
 #include <time.h>
 
+#include <utils.h>
+
 #define BACKLOG 5
 
 //TODO : add signal handler to properly shutdown server
-//TODO : Move printerr, debug, and reporterr to common file
-
-void printerr(const char* fmt, ...){
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-}
-
-void debug(const char* fmt, ...){
-#ifdef DEBUG
-    va_list args;
-    va_start(args, fmt);
-    vprintf(fmt, args);
-    va_end(args);
-#endif
-}
-
-void reporterr(int ret_val, int _errno){
-    printerr("Error: %d : errno %d : %s\n", ret_val, _errno, strerror(_errno));
-}
 
 int main(int argc, char *argv[]){
     uint32_t port = 0;

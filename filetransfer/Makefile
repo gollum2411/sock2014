@@ -2,16 +2,16 @@ CC?=gcc
 CFLAGS?=-I.
 
 INCLUDES=-I../utils/
- 
+
 CFLAGS+=$(INCLUDES)
 
 bindir=bin/
-_bin_name=timeserver
+_bin_name=filetransfer
 bin=$(addprefix $(bindir),$(_bin_name))
 $(bin) : | $(bindir)
 
 objdir=obj/
-objs_list=timeserver.o
+objs_list=filetransfer.o
 objs=$(addprefix $(objdir),$(objs_list))
 $(objs) : | $(objdir)
 
@@ -26,11 +26,9 @@ endif
 all : $(bin)
 
 $(objdir) :
-	@echo Creating $@
 	mkdir -p $@
 
 $(bindir) :
-	@echo Creating $@
 	mkdir -p $@
 
 $(bin) : $(objs) $(utils_objs)
@@ -38,11 +36,9 @@ $(bin) : $(objs) $(utils_objs)
 	@echo Done
 
 $(objdir)%.o : %.c
-	@echo Compiling objects from $^
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 $(utils_objs_dir)%.o :
-	@echo Compiling utils
 	make -C ../utils
 
 clean :
