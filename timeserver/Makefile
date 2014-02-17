@@ -1,8 +1,8 @@
 CC?=gcc
-CFLAGS?=-I.
+CFLAGS?=-I. -Wall -Werror
 
 INCLUDES=-I../utils/
- 
+
 CFLAGS+=$(INCLUDES)
 
 bindir=bin/

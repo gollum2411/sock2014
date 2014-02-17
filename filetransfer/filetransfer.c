@@ -3,18 +3,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define FILE_TO_TRANSFER "/tmp/something.txt"
-#define BACKLOG 5
 #define LISTENER_PORT 7777
 #define MAXBUF 256
 
-int transfer_file(int client){
-    int file = open(FILE_TO_TRANSFER, O_RDONLY);
+int transfer_file(int client, const char *file_to_tranfer){
+    int file = open(file_to_tranfer, O_RDONLY);
     int bytes_read = 0;
     int total_bytes = 0;
     char buf[MAXBUF] = {};
     if(file == -1){
-        debug("Failed opening file %s", FILE_TO_TRANSFER);
+        debug("Failed opening file %s", file_to_tranfer);
         reporterr(file, errno);
     }
 
@@ -42,26 +40,24 @@ int main(int argc, char *argv[]){
     int client = 0;
     int ret_val = -1;
     uint32_t port = LISTENER_PORT;
-    struct sockaddr_in addr;
     struct sockaddr_in client_addr;
     socklen_t client_len = 0;
     char message[] = "Send 'START' to start transfer...\n";
     char buf[MAXBUF] = {0};
+    char *file_to_transfer = NULL;
     int count = 0;
 
-    printf("File to transfer must be located in %s\n", FILE_TO_TRANSFER);
-
-    ret_val = get_bind_ipv4_server(&server, port);
-    if(ret_val || !server){
-        reporterr(ret_val, errno);
+    if(argc != 2){
+        printerr("Usage: %s <file_to_serve>\n", argv[0]);
         exit(-1);
     }
 
-    debug("Starting to listen...\n");
-    ret_val = listen(server, BACKLOG);
-    if(ret_val == -1){
+    file_to_transfer = argv[1];
+    printf("File to transfer: %s\n", file_to_transfer);
+
+    ret_val = setup_listener_socket(&server, port);
+    if(ret_val || !server){
         reporterr(ret_val, errno);
-        close(server);
         exit(-1);
     }
 
@@ -83,9 +79,15 @@ int main(int argc, char *argv[]){
 
         write(client, message, strlen(message));
         count = read(client, (void*)buf, MAXBUF-1);
+        if(count < 0){
+            printerr("Error reading client socket\n");
+            reporterr(count, errno);
+            close(client);
+            continue;
+        }
         if(strstr(buf, "START") != NULL){
             printf("Starting transfer...\n");
-            if(transfer_file(client)){
+            if(transfer_file(client, file_to_transfer)){
                 debug("File transfer failed...\n");
             };
         }

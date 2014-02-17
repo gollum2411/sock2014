@@ -1,4 +1,5 @@
 #include <utils.h>
+#define BACKLOG 5
 
 void printerr(const char* fmt, ...){
     va_list args;
@@ -21,7 +22,7 @@ void reporterr(int ret_val, int _errno){
     printerr("Error: %d : errno %d : %s\n", ret_val, _errno, strerror(_errno));
 }
 
-int get_bind_ipv4_server(int *server_desc, const uint32_t port){
+int setup_listener_socket(int *server_desc, const uint32_t port){
     int ret_val = -1;
     int server = 0;
     struct sockaddr_in server_addr;
@@ -63,6 +64,14 @@ int get_bind_ipv4_server(int *server_desc, const uint32_t port){
         return -1;
     }
     debug("Socket bound...\n");
+
+    ret_val = listen(server, BACKLOG);
+    if(ret_val == -1){
+        reporterr(ret_val, errno);
+        close(server);
+        return -1;
+    }
+    debug("Listening...\n");
 
     *server_desc = server;
     return 0;
