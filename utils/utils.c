@@ -1,4 +1,5 @@
 #include <utils.h>
+#include <netdb.h>
 #define BACKLOG 5
 
 void printerr(const char* fmt, ...){
@@ -75,4 +76,45 @@ int setup_listener_socket(int *server_desc, const uint32_t port){
 
     *server_desc = server;
     return 0;
+}
+
+/*
+    int connect_to(const char *ip_addr, const uint32_t port)
+    Connect to ip_addr:port. Returns socket file descriptor.
+*/
+
+int connect_to(const char *ip_addr, const uint32_t port){
+    int sockfd = 0;
+    int ret_val = -1;
+    struct hostent *server = NULL;
+    struct sockaddr_in server_addr;
+
+    bzero((void*)&server_addr, sizeof(struct sockaddr_in));
+
+    server = gethostbyname(ip_addr);
+    if(!server){
+        printerr("gethostbyname() failed\n");
+        reporterr(-1, errno);
+        return -1;
+    }
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockfd == -1){
+        printerr("Failed opening socket\n");
+        reporterr(sockfd, errno);
+        return -1;
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+
+    memcpy((void*)&server_addr.sin_addr.s_addr, (void*)server->h_addr, (size_t)server->h_length);
+    ret_val = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr_in));
+    if(ret_val == -1){
+        printerr("Failed connecting\n");
+        reporterr(ret_val, errno);
+        return -1;
+    }
+
+    return sockfd;
 }

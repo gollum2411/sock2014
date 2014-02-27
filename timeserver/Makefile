@@ -15,7 +15,8 @@ objs_list=timeserver.o
 objs=$(addprefix $(objdir),$(objs_list))
 $(objs) : | $(objdir)
 
-utils_objs_dir=../utils/obj/
+utils_dir=../utils/
+utils_objs_dir=$(utils_dir)obj/
 utils_objs_list=utils.o
 utils_objs=$(addprefix $(utils_objs_dir),$(utils_objs_list))
 
@@ -41,7 +42,7 @@ $(objdir)%.o : %.c
 	@echo Compiling objects from $^
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(utils_objs_dir)%.o :
+$(utils_objs_dir)%.o : $(utils_dir)%.c
 	@echo Compiling utils
 	make -C ../utils
 

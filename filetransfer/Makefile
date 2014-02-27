@@ -11,11 +11,12 @@ bin=$(addprefix $(bindir),$(_bin_name))
 $(bin) : | $(bindir)
 
 objdir=obj/
-objs_list=filetransfer.o
+objs_list=filetransfer.o server.o client.o
 objs=$(addprefix $(objdir),$(objs_list))
 $(objs) : | $(objdir)
 
-utils_objs_dir=../utils/obj/
+utils_dir=../utils/
+utils_objs_dir=$(utils_dir)obj/
 utils_objs_list=utils.o
 utils_objs=$(addprefix $(utils_objs_dir),$(utils_objs_list))
 
@@ -38,7 +39,7 @@ $(bin) : $(objs) $(utils_objs)
 $(objdir)%.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(utils_objs_dir)%.o :
+$(utils_objs_dir)%.o : $(utils_dir)%.c
 	make -C ../utils
 
 clean :

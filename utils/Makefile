@@ -1,5 +1,5 @@
 CC?=gcc
-CFLAGS?=-I.
+CFLAGS?=-I. -Wall -Werror
 
 objdir=obj/
 objs_list=utils.o
@@ -17,6 +17,6 @@ $(objdir)%.o : %.c
 
 $(objdir) :
 	mkdir -p $@
-	
+
 clean :
 	rm -rf $(objdir)
