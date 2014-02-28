@@ -1,4 +1,4 @@
-CC?=gcc
+CC?=g++
 CFLAGS?=-I. -Wall -Werror
 
 INCLUDES=-I../utils/
@@ -27,10 +27,10 @@ endif
 all : $(bin)
 
 $(objdir) :
-	mkdir -p $@
+	@mkdir -p $@
 
 $(bindir) :
-	mkdir -p $@
+	@mkdir -p $@
 
 $(bin) : $(objs) $(utils_objs)
 	$(CC) $(CFLAGS) -o $@ $^

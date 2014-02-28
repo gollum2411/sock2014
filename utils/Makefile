@@ -1,4 +1,4 @@
-CC?=gcc
+CC?=g++
 CFLAGS?=-I. -Wall -Werror
 
 objdir=obj/
@@ -16,7 +16,7 @@ $(objdir)%.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 $(objdir) :
-	mkdir -p $@
+	@mkdir -p $@
 
 clean :
 	rm -rf $(objdir)
