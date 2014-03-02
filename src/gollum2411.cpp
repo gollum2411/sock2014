@@ -9,6 +9,7 @@ using std::string;
 
 namespace gollum2411{
     TCPSocket::TCPSocket(){
+        debug("TCPSocket ctor\n");
         this->server_fd = 0;
         this->is_server = false;
         this->is_client = false;

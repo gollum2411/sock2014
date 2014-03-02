@@ -1,4 +1,4 @@
-CC?=g++
+CC=g++
 CFLAGS?=-I. -Wall -Werror
 
 INCLUDES=-I../utils/
@@ -36,10 +36,10 @@ $(bin) : $(objs) $(utils_objs)
 	$(CC) $(CFLAGS) -o $@ $^
 	@echo Done
 
-$(objdir)%.o : %.c
+$(objdir)%.o : %.cpp
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(utils_objs_dir)%.o : $(utils_dir)%.c
+$(utils_objs_dir)%.o : $(utils_dir)%.cpp
 	make -C ../utils
 
 clean :

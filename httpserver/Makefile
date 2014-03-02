@@ -47,7 +47,7 @@ $(objdir)%.o : %.cpp
 	@echo Compiling objects from $^
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(utils_objs_dir)%.o : $(utils_dir)%.c
+$(utils_objs_dir)%.o : $(utils_dir)%.cpp
 	@echo Compiling utils
 	make -C ../utils
 

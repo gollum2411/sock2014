@@ -1,4 +1,4 @@
-CC?=g++
+CC=g++
 CFLAGS?=-I. -Wall -Werror
 
 INCLUDES=-I../utils/
@@ -8,12 +8,10 @@ CFLAGS+=$(INCLUDES)
 bindir=bin/
 _bin_name=timeserver
 bin=$(addprefix $(bindir),$(_bin_name))
-$(bin) : | $(bindir)
 
 objdir=obj/
 objs_list=timeserver.o
 objs=$(addprefix $(objdir),$(objs_list))
-$(objs) : | $(objdir)
 
 utils_dir=../utils/
 utils_objs_dir=$(utils_dir)obj/
@@ -25,6 +23,8 @@ ifeq ($(DEBUG), 1)
 endif
 
 all : $(bin)
+$(objs) : | $(objdir)
+$(bin) : | $(bindir)
 
 $(objdir) :
 	@echo Creating $@
@@ -38,11 +38,12 @@ $(bin) : $(objs) $(utils_objs)
 	$(CC) $(CFLAGS) -o $@ $^
 	@echo Done
 
-$(objdir)%.o : %.c
+$(objdir)%.o : %.cpp
+	@echo $@ target
 	@echo Compiling objects from $^
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(utils_objs_dir)%.o : $(utils_dir)%.c
+$(utils_objs_dir)%.o : $(utils_dir)%.cpp
 	@echo Compiling utils
 	make -C ../utils
 

@@ -1,4 +1,4 @@
-CC?=g++
+CC=g++
 CFLAGS?=-I. -Wall -Werror
 
 objdir=obj/
@@ -12,7 +12,7 @@ endif
 
 all : $(objs)
 
-$(objdir)%.o : %.c
+$(objdir)%.o : %.cpp
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 $(objdir) :
