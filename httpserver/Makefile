@@ -11,7 +11,7 @@ bin=$(addprefix $(bindir),$(_bin_name))
 $(bin) : | $(bindir)
 
 objdir=obj/
-objs_list=httpserver.o
+objs_list=HTTPServer.o main.o
 objs=$(addprefix $(objdir),$(objs_list))
 $(objs) : | $(objdir)
 

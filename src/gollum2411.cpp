@@ -19,12 +19,14 @@ namespace gollum2411{
     }
 
     TCPSocket::~TCPSocket(){
-
+        debug("TCPSocket dtor\n");
         if(server_fd > 0){
+            debug("Closing server_fd\n");
             ::close(server_fd);
         }
 
         if(client_fd > 0){
+            debug("Closing client_fd\n");
             ::close(client_fd);
         }
 
@@ -59,8 +61,18 @@ namespace gollum2411{
             throw socket_error("setsockopt failed");
         }
 
+        ret_val = setsockopt(this->server_fd, SOL_SOCKET, SO_REUSEPORT,
+                            (const char *) &sockopt, sizeof(sockopt));
+        if(ret_val){
+            throw socket_error("setsockopt failed");
+        }
+
         ret_val = ::bind(this->server_fd, (const struct sockaddr*)&server_addr,
                    (socklen_t)sizeof(struct sockaddr_in));
+        if(ret_val == -1){
+            throw socket_error("bind failed");
+        }
+        debug("Bound to %d\n", port);
     }
 
     void TCPSocket::listen(const int backlog){
@@ -68,6 +80,7 @@ namespace gollum2411{
         if(ret_val){
             throw socket_error("listen failed");
         }
+        debug("Listening...\n");
     }
 
     void TCPSocket::accept(){
@@ -78,6 +91,7 @@ namespace gollum2411{
         if(this->client_fd == -1){
             throw socket_error("accept failed");
         }
+        debug("Connection accepted\n");
     }
 
     void TCPSocket::send(string msg){
@@ -93,6 +107,7 @@ namespace gollum2411{
         if(bytes_read == -1){
             throw socket_error("read failed");
         }
+        debug("recv success\n");
         return string(this->buf);
     }
 
@@ -121,16 +136,28 @@ namespace gollum2411{
         if(ret_val){
             throw socket_error("connect failed");
         }
+        debug("connect success\n");
     }
 
     void TCPSocket::close(){
+        debug("Closing connections\n");
         if(this->is_server){
             ::close(this->client_fd);
+            this->client_fd = 0;
         }
 
         if(this->is_client){
             ::close(this->client_fd);
+            this->client_fd = 0;
         }
+    }
+
+    int TCPSocket::get_server_fd(){
+        return this->server_fd;
+    }
+
+    int TCPSocket::get_client_fd(){
+        return this->client_fd;
     }
 
     socket_error::socket_error(const std::string& msg) :
