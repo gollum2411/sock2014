@@ -21,7 +21,9 @@ class HTTPServer : protected gollum2411::TCPSocket{
         void serve(); /*!<Serves a client.
                        This method will serve only one connection,
                        so it is recommended to call this from within
-                       a loop.*/
+                       a loop. Note that this will only serve files
+                       located in the same directory from where the
+                       binary is invoked.*/
     private:
         string get_file_to_serve(string &data);
         void process_request(string &data);
