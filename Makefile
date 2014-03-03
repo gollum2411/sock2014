@@ -3,6 +3,9 @@ CFLAGS?=-I. -Wall -Werror
 
 INCLUDES=-Iinclude -Iutils
 
+docdir=doc/
+doxyfile = ./sock2014.dox
+
 objdir=obj/
 common_objs_list = gollum2411.o
 common_objs=$(addprefix $(objdir),$(common_objs_list))
@@ -18,9 +21,9 @@ endif
 subprojs = utils timeserver filetransfer\
 	   httpserver
 
-all : $(subprojs)
+all : $(subprojs) doc
 common : $(common_objs)
-
+doc : | $(docdir)
 $(objdir)%.o : $(srcdir)%.cpp | $(objdir)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $^
 
@@ -30,9 +33,19 @@ $(subprojs) : $(common_objs)
 $(objdir) :
 	@mkdir -p obj
 
-clean :
+doc :
+	@echo Generating doxygen documentation
+	doxygen $(doxyfile) 2>&1 > /dev/null
+
+$(docdir) :
+	mkdir -p $@
+
+clean : cleandoc
 	@for d in ${subprojs}; do make -C $$d clean ; done
 	rm -rf $(objdir)
+
+cleandoc :
+	rm -rf $(docdir)
 
 
 .PHONY : all $(subprojs) $(objdir) common

@@ -45,8 +45,8 @@ namespace gollum2411{
             struct sockaddr_in server_addr;
             struct sockaddr_in client_addr;
         protected:
-            int server_fd;
-            int client_fd;
+            int server_fd; /*!<Server file descriptor.*/
+            int client_fd; /*!<Client file descriptor.*/
     };
 
     /**
@@ -54,7 +54,7 @@ namespace gollum2411{
     */
     class socket_error : public runtime_error {
         public:
-            socket_error(const std::string& msg);
+            socket_error(const std::string& msg); /*!<Class constructor.*/
     };
 }
 
