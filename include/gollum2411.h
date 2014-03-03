@@ -1,11 +1,12 @@
 #ifndef GOLLUM_2411
 #define GOLLUM_2411
 
+#include <stdexcept>
+#include <iostream>
+
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <stdexcept>
-#include <iostream>
 
 #include <utils.h>
 

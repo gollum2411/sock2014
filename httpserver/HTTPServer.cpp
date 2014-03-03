@@ -1,13 +1,14 @@
-#include <sys/sendfile.h>
-#include <HTTPServer.h>
 #include <sstream>
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/sendfile.h>
 
+#include <HTTPServer.h>
 
 using std::string;
 using std::cout;

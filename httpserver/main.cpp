@@ -1,6 +1,7 @@
+#include <iostream>
+
 #include <HTTPServer.h>
 #include <signal.h>
-#include <iostream>
 
 using std::cout;
 using std::endl;
