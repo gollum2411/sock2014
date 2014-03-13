@@ -1,4 +1,5 @@
 #include <sstream>
+#include <memory>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,9 +15,10 @@ using std::string;
 using std::cout;
 using std::endl;
 using std::stringstream;
+using std::make_shared;
 
 HTTPServer::HTTPServer() :
-TCPSocket()
+Socket(PF_INET, SOCK_STREAM, 0)
 {
 
 }
@@ -45,7 +47,7 @@ void HTTPServer::send_404(){
     response << "Connection: close" << endl << endl;
     response << "<html><body>File requested not found :(\
                  </body></html>" << endl;
-    this->send(response.str());
+    client_response->send(response.str());
     return;
 }
 
@@ -58,7 +60,7 @@ void HTTPServer::show_default(){
     response << "Connection: close" << endl << endl;
     response << html_response;
     cout << "Response:" << endl << response.str() << endl;
-    this->send(response.str());
+    client_response->send(response.str());
     return;
 }
 
@@ -69,7 +71,7 @@ void HTTPServer::process_request(string &data){
     string html_response;
 
     if(file_to_serve == "./"){
-        this->show_default();
+        show_default();
         return;
     }
 
@@ -96,8 +98,8 @@ void HTTPServer::process_request(string &data){
     response << "Content-Disposition: attachment; filename=" << basefile << endl;
     response << "Content-Length: " << s.st_size << endl;
     response << "Content-Transfer-Encoding: binary" << endl << endl;
-    this->send(response.str());
-    bytes_written = sendfile(this->client_fd, fd,
+    client_response->send(response.str());
+    bytes_written = sendfile(client_response->get_sockfd(), fd,
                             NULL, s.st_size);
     if(bytes_written != (size_t)s.st_size){
         printerr("sendfile failed\n");
@@ -107,19 +109,19 @@ void HTTPServer::process_request(string &data){
 }
 
 void HTTPServer::start_server(const int port){
-    this->bind(port);
-    this->listen();
+    bind(port);
+    listen();
 }
 
 void HTTPServer::serve(){
 
     string recvd;
-    this->accept();
+    client_response = accept();
 
     int state=1;
-    setsockopt(this->client_fd, IPPROTO_TCP, TCP_CORK,
+    setsockopt(client_response->get_sockfd(), IPPROTO_TCP, TCP_CORK,
                &state, sizeof(state));
-    recvd = this->recv();
-    this->process_request(recvd);
-    this->close();
+    recvd = client_response->recv();
+    process_request(recvd);
+    client_response.reset();
 }

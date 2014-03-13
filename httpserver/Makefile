@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS?=-I. -Wall -Werror
+CFLAGS?=-I. -Wall -Werror -std=c++0x
 
 INCLUDES=-I../utils/ -I../include
 

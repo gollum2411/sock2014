@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <memory>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -12,47 +13,37 @@
 
 using std::runtime_error;
 using std::string;
+using std::shared_ptr;
 
 namespace gollum2411{
-    /**
-     * Class to abstract socket behavior
-    */
-    class TCPSocket{
+    class Socket{
         public:
-            TCPSocket(); /*!<Class constuctor. Initializes buffer and structs.*/
-            ~TCPSocket(); /*!<Class destructor. Deletes buffer, closes socket file descriptors.*/
-            void bind(const int port); /*!<Binds to port specified by port parameter.
-                                        *@param[in] port Port to connect to.*/
-            void connect(const char *ip, const int port); /*!<Connect to ip:port.
-                                        *@param[in] ip IP address to connect to.
-                                        *@param[in] port Port to connect to.*/
-            void listen(const int backlog=5); /*!<Starts listening.
-                                               *@param[in] backlog [default=5]
-                                               Specifies maximum length of connection
-                                               queue.*/
-            void accept(); /*!<Accepts first connection in queue.*/
-            string recv(); /*!<[blocking] Reads from client socket. Assumes a connection has been accepted.*/
-            void send(string msg); /*!<[blocking] Writes to client socket. Assumes a connection has been accepted.*/
-            void close(); /*!<Closes client socket.*/
-            int get_server_fd(); /*!<Get server socket descriptor.
-                                  *\return Server socket descriptor.*/
-            int get_client_fd(); /*!<Get client socket descriptor.
-                                  *\return Client socket descriptor.*/
+            Socket(int _domain, int _type, int _protocol);
+            Socket(int _sockfd, struct sockaddr_in _addr, int _domain,
+                   int _type, int _protocol);
+            ~Socket();
+            void bind(const int port);
+            void connect(const char *ip, const int port);
+            void listen(const int backlog=5);
+            shared_ptr<Socket> accept();
+            string recv();
+            void send(string msg);
+            void close();
+            int get_sockfd();
         private:
             static const size_t size = 30000;
-            bool is_server;
-            bool is_client;
             char *buf;
-            struct sockaddr_in server_addr;
-            struct sockaddr_in client_addr;
-        protected:
-            int server_fd; /*!<Server file descriptor.*/
-            int client_fd; /*!<Client file descriptor.*/
+            int sockfd;
+            struct sockaddr_in addr;
+            string ipaddr;
+            int port;
+            bool is_client;
+            bool is_server;
+            int domain;
+            int type;
+            int protocol;
     };
 
-    /**
-     * Exception class for internal socket errors
-    */
     class socket_error : public runtime_error {
         public:
             socket_error(const std::string& msg); /*!<Class constructor.*/

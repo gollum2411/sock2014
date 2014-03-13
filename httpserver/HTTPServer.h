@@ -2,14 +2,16 @@
 #define _HTTPSERVER_H
 
 #include <gollum2411.h>
+#include <memory>
 
 using std::string;
+using std::shared_ptr;
 
 /**
  * Simple HTTP server
 */
 
-class HTTPServer : protected gollum2411::TCPSocket{
+class HTTPServer : protected gollum2411::Socket{
     public:
         HTTPServer(); /*!<Class constructor.*/
         ~HTTPServer(); /*!<Class destructor.*/
@@ -29,6 +31,7 @@ class HTTPServer : protected gollum2411::TCPSocket{
         void process_request(string &data);
         void show_default();
         void send_404();
+        shared_ptr<Socket> client_response;
 };
 
 #endif //_HTTPSERVER_H
