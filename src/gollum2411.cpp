@@ -196,6 +196,41 @@ namespace gollum2411{
         return sockfd;
     }
 
+    string Socket::recvfrom(struct sockaddr_in &response_addr){
+        struct sockaddr_in rsock;
+        socklen_t len = sizeof(rsock);
+        bzero(&rsock, len);
+        bzero(buf, size);
+        int ret_val = ::recvfrom(sockfd, buf, size, 0, (struct sockaddr*)&rsock, &len);
+        if(ret_val == -1){
+            throw socket_error("recvfrom");
+        }
+
+        response_addr = rsock;
+        return string(buf);
+    }
+
+    void Socket::sendto(string msg, string addr, const int port){
+        struct sockaddr_in sockaddr;
+        int ret_val = -1;
+        bzero(&sockaddr, sizeof(sockaddr));
+
+        sockaddr.sin_family = domain;
+        sockaddr.sin_port = htons(port);
+        ret_val = inet_aton(addr.c_str(), &sockaddr.sin_addr);
+        if(ret_val==0){
+            throw socket_error("inet_aton");
+        }
+
+        socklen_t len = sizeof(sockaddr);
+        int bytes = ::sendto(sockfd, msg.c_str(), msg.length(), 0,
+                             (const struct sockaddr*)&sockaddr, len);
+        if(bytes == -1){
+            throw socket_error("sendto");
+        }
+        return;
+    }
+
     socket_error::socket_error(const std::string& msg) :
         std::runtime_error(msg)
     {

@@ -28,6 +28,8 @@ namespace gollum2411{
             shared_ptr<Socket> accept();
             string recv();
             void send(string msg);
+            string recvfrom(struct sockaddr_in &response_addr);
+            void sendto(string msg, string addr, const int port);
             void close();
             int get_sockfd();
         private:
