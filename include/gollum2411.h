@@ -11,10 +11,6 @@
 
 #include <utils.h>
 
-using std::runtime_error;
-using std::string;
-using std::shared_ptr;
-
 namespace gollum2411{
     class Socket{
         public:
@@ -25,19 +21,21 @@ namespace gollum2411{
             void bind(const int port);
             void connect(const char *ip, const int port);
             void listen(const int backlog=5);
-            shared_ptr<Socket> accept();
-            string recv();
-            void send(string msg);
-            string recvfrom(struct sockaddr_in &response_addr);
-            void sendto(string msg, string addr, const int port);
+            std::shared_ptr<Socket> accept();
+            std::string recv();
+            void send(std::string msg);
+            std::string recvfrom(struct sockaddr_in &response_addr);
+            void sendto(std::string addr, const int port, std::string msg);
+            void sendto(struct sockaddr_in addr, std::string msg);
             void close();
             int get_sockfd();
+            typedef std::shared_ptr<Socket> ptr;
         private:
             static const size_t size = 30000;
             char *buf;
             int sockfd;
             struct sockaddr_in addr;
-            string ipaddr;
+            std::string ipaddr;
             int port;
             bool is_client;
             bool is_server;
@@ -46,7 +44,7 @@ namespace gollum2411{
             int protocol;
     };
 
-    class socket_error : public runtime_error {
+    class socket_error : public std::runtime_error {
         public:
             socket_error(const std::string& msg); /*!<Class constructor.*/
     };

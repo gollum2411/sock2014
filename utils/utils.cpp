@@ -1,6 +1,13 @@
 #include <utils.h>
 #include <netdb.h>
+#include <dirent.h>
+
+#include <iostream>
+
 #define BACKLOG 5
+
+using std::string;
+using std::vector;
 
 void printerr(const char* fmt, ...){
     va_list args;
@@ -117,4 +124,42 @@ int connect_to(const char *ip_addr, const uint32_t port){
     }
 
     return sockfd;
+}
+
+std::string slice(std::string str, string::size_type start, string::size_type end){
+    std::string retstr;
+    for(string::size_type i = start; i < end; ++i){
+        if(i == str.length()){
+            retstr = "";
+            break;
+        }
+        retstr+=str[i];
+    }
+    return retstr;
+}
+
+vector<string> get_files(string path){
+    debug("Getting files\n");
+    DIR *dir;
+    struct dirent *ent;
+    string f;
+    vector<string> files;
+    if ((dir = opendir (path.c_str())) != NULL) {
+        /* print all the files and directories within directory */
+        while ((ent = readdir (dir)) != NULL) {
+            f = ent->d_name;
+            if(f == "." || f == "..") continue; // Don't count . or ..
+            files.push_back(ent->d_name);
+        }
+        closedir(dir);
+    }
+    return files;
+}
+
+int get_file_count(string path){
+    vector<string> files = get_files(path);
+    if(files.empty()){
+        return 0;
+    }
+    else return (int)files.size();
 }

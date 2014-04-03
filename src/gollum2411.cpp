@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <new>
 #include <memory>
+#include <sstream>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -9,6 +10,7 @@
 #include <utils.h>
 
 using std::string;
+using std::stringstream;
 using std::shared_ptr;
 using std::make_shared;
 
@@ -46,6 +48,7 @@ namespace gollum2411{
         if(sockfd == -1){
             throw socket_error("socket");
         }
+        debug("sockfd = %d\n", sockfd);
         buf = NULL;
         buf = new char[size];
 
@@ -84,12 +87,6 @@ namespace gollum2411{
         addr.sin_port = htons(_port);
 
         ret_val = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR,
-                            (const char *) &sockopt, sizeof(sockopt));
-        if(ret_val){
-            throw socket_error("setsockopt failed");
-        }
-
-        ret_val = setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT,
                             (const char *) &sockopt, sizeof(sockopt));
         if(ret_val){
             throw socket_error("setsockopt failed");
@@ -210,15 +207,15 @@ namespace gollum2411{
         return string(buf);
     }
 
-    void Socket::sendto(string msg, string addr, const int port){
+    void Socket::sendto(string addr, const int port, string msg){
         struct sockaddr_in sockaddr;
         int ret_val = -1;
         bzero(&sockaddr, sizeof(sockaddr));
 
         sockaddr.sin_family = domain;
         sockaddr.sin_port = htons(port);
-        ret_val = inet_aton(addr.c_str(), &sockaddr.sin_addr);
-        if(ret_val==0){
+        ret_val = inet_pton(domain, addr.c_str(), &sockaddr.sin_addr.s_addr);
+        if(ret_val!=1){
             throw socket_error("inet_aton");
         }
 
@@ -226,9 +223,23 @@ namespace gollum2411{
         int bytes = ::sendto(sockfd, msg.c_str(), msg.length(), 0,
                              (const struct sockaddr*)&sockaddr, len);
         if(bytes == -1){
-            throw socket_error("sendto");
+            stringstream ss;
+            ss << "sendto : " << errno  << " : " << strerror(errno);
+            throw socket_error(ss.str());
         }
+        debug("sendto succeeded\n");
         return;
+    }
+
+    void Socket::sendto(struct sockaddr_in addr, string msg){
+        char buf[255] = {0};
+        if(inet_ntop(AF_INET, &addr.sin_addr, buf, sizeof(buf)) == NULL){
+            throw socket_error("inet_ntop failed");
+        }
+
+        int port = ntohs(addr.sin_port);
+
+        sendto(buf, port, msg);
     }
 
     socket_error::socket_error(const std::string& msg) :

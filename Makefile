@@ -7,7 +7,7 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -DDEBUG -g
 endif
 
-all : common utils hostdiscover filetransfer httpserver timeserver doc
+all : common utils filetransfer httpserver timeserver filediscover
 
 #common
 srcdir=src/
@@ -30,23 +30,6 @@ $(utils_objdir):
 	mkdir -p $@
 $(utils_objdir)%.o : $(utils_dir)%.cpp | $(utils_objdir)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $^
-
-#hostdiscover
-hostdiscover_dir=hostdiscover/
-hostdiscover_bindir=$(hostdiscover_dir)bin/
-hostdiscover_objdir=$(hostdiscover_dir)obj/
-hostdiscover_objs_list=main.o
-hostdiscover_objs=$(addprefix $(hostdiscover_objdir),$(hostdiscover_objs_list))
-hostdiscover_bin=$(hostdiscover_bindir)hostdiscover
-hostdiscover : $(hostdiscover_bin)
-$(hostdiscover_bin) : $(common_objs) $(utils_objs) $(hostdiscover_objs) | $(hostdiscover_bindir)
-	$(CC) $(CLAGS) -o $@ $^
-$(hostdiscover_objdir)%.o : $(hostdiscover_dir)%.cpp | $(hostdiscover_objdir)
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $^
-$(hostdiscover_bindir) :
-	mkdir -p $@
-$(hostdiscover_objdir) :
-	mkdir -p $@
 
 #filetransfer
 filetransfer_dir=filetransfer/
@@ -99,6 +82,24 @@ $(timeserver_objdir) :
 $(timeserver_bindir) :
 	mkdir -p $@
 
+#filediscover
+filediscover_dir=filediscover/
+filediscover_bindir=$(filediscover_dir)bin/
+filediscover_objdir=$(filediscover_dir)obj/
+filediscover_objs_list=main.o discover_client.o discover_client.o discover_server.o\
+                       fileserver.o fileclient.o
+filediscover_objs=$(addprefix $(filediscover_objdir),$(filediscover_objs_list))
+filediscover_bin=$(filediscover_bindir)filediscover
+filediscover:$(filediscover_bin)
+$(filediscover_bin) : $(filediscover_objs) $(utils_objs) $(common_objs) | $(filediscover_bindir)
+	$(CC) $(CFLAGS) -o $@ $^ -lpthread
+$(filediscover_objdir)%.o : $(filediscover_dir)%.cpp | $(filediscover_objdir)
+	$(CC) $(CFLAGS) $(INCLUDES) -I$(filediscover_dir) -c -o $@ $^
+$(filediscover_objdir) :
+	mkdir -p $@
+$(filediscover_bindir) :
+	mkdir -p $@
+
 #doc
 docdir=doc/
 doxyfile = ./sock2014.dox
@@ -117,7 +118,8 @@ clean : cleandoc
 	    $(hostdiscover_objdir) $(hostdiscover_bindir) \
 	    $(filetransfer_objdir) $(filetransfer_bindir) \
 	    $(httpserver_objdir) $(httpserver_bindir) \
-	    $(timeserver_objdir) $(timeserver_bindir)
+	    $(timeserver_objdir) $(timeserver_bindir) \
+	    $(filediscover_objdir) $(filediscover_bindir)
 
 
-.PHONY : all $(subprojs) common
+.PHONY : all $(subprojs) common doc
