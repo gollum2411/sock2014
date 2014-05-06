@@ -45,7 +45,7 @@ NodeInfo get_node_info(string msg){
     Slice string to grab server name, port and file_count
     */
 
-    string::size_type idx = msg.find(":");
+    string::size_type idx = msg.find(" ");
     if(idx == string::npos){
         throw runtime_error(MALFORMED_GREETING + " : \n" + msg);
     }
@@ -55,6 +55,7 @@ NodeInfo get_node_info(string msg){
         throw runtime_error(MALFORMED_GREETING + " : \n" + msg);
     }
     name = slice(msg, idx+1, idx2);
+    debug("name=%s\n", name.c_str());
 
     idx = msg.find(":", idx+1);
     if(idx == string::npos){
@@ -65,11 +66,12 @@ NodeInfo get_node_info(string msg){
     if(idx == string::npos){
         throw runtime_error(MALFORMED_GREETING + " : \n" + msg);
     }
-    temp << slice(msg, idx+1, idx2);
+    temp << slice(msg, idx+2, idx2);
     temp >> port;
     if(port == 0){
         throw runtime_error(MALFORMED_GREETING + " : \n" + msg);
     }
+    debug("port=%d\n", port);
 
     idx = msg.find(":", idx+1);
     if(idx == string::npos){
@@ -83,11 +85,12 @@ NodeInfo get_node_info(string msg){
     //reset temp
     temp.str("");
     temp.clear();
-    temp << slice(msg, idx+1, idx2);
+    temp << slice(msg, idx+2, idx2);
     temp >> file_count;
     if(file_count == 0){
         throw runtime_error(MALFORMED_GREETING + " : \n" + msg);
     }
+    debug("file_count=%d\n", file_count);
 
     return NodeInfo(name, port, file_count);
 }
@@ -134,7 +137,7 @@ void missing_cfg(){
     cerr << "Make sure " << CFG_FILE << " is a valid and readable file" << endl;
 }
 
-int look_for_servers(int udp_port, int timeout){
+int look_for_servers(string bdcast, int udp_port, int timeout){
     int sockopt = 1;
     int ret_val = -1;
     Socket socket(AF_INET, SOCK_DGRAM, 0);
@@ -164,9 +167,9 @@ int look_for_servers(int udp_port, int timeout){
     }
 
     stringstream msg;
-    msg << HELLO_FROM << node_name << NEWLINE << NEWLINE;
+    msg << HELLO_FROM << " " << node_name << NEWLINE << NEWLINE;
 
-    socket.sendto("255.255.255.255", udp_port, msg.str());
+    socket.sendto(bdcast.c_str(), udp_port, msg.str());
     cout << "Available servers:" << endl;
     // Since SO_RCVTIMEO has been set, catch socket_error and return
     try{
@@ -178,5 +181,6 @@ int look_for_servers(int udp_port, int timeout){
         //Assume timeout has been reached
         return 0;
     }
+
     return 0;
 }

@@ -18,7 +18,7 @@ void do_ping(Socket::ptr sock, string ip, int port){
     sock->connect(ip.c_str(), port);
     sock->send(PING + NEWLINE + NEWLINE);
     string response = sock->recv();
-    if(response.substr(0, PONG.length()) != PONG){
+    if(response.find(PONG) == string::npos){
         throw(gollum2411::socket_error("No PONG received"));
     }
 }
@@ -26,6 +26,7 @@ void do_ping(Socket::ptr sock, string ip, int port){
 void get_filelist(string ip, int port){
     Socket::ptr sock(new Socket(AF_INET, SOCK_STREAM, 0));
     do_ping(sock, ip, port);
+
     stringstream command;
     command << FILELIST << NEWLINE << NEWLINE;
     sock->send(command.str());
@@ -35,6 +36,7 @@ void get_filelist(string ip, int port){
 void get_file(std::string filename, std::string ip, int port){
     Socket::ptr sock(new Socket(AF_INET, SOCK_STREAM, 0));
     do_ping(sock, ip, port);
+
     stringstream command;
     command << GETFILE << NEWLINE;
     command << NOMBRE << filename << NEWLINE << NEWLINE;

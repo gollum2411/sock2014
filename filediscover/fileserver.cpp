@@ -53,7 +53,7 @@ map<string, string> parse_request(string msg){
 
     // skip over newline
     // e.g.:
-    // GETFILE\r\nNombre:filename\r\n\r\n
+    // GETFILE\r\nNombre: filename\r\n\r\n
     idx = idx + NEWLINE.length();
 
     // Get only the args portion of msg
@@ -67,13 +67,13 @@ map<string, string> parse_request(string msg){
         }
         key = slice(msg, idx, idx2);
         // When comparing, remember to strip ":" from constants
-        if(key != NOMBRE.substr(0, NOMBRE.length() - 1)){
+        if(key != NOMBRE.substr(0, (NOMBRE.length() - 1))){
             throw(runtime_error(MALFORMED_TCP_REQUEST + "\n" + original_msg));
         }
         //idx points to [0], idx2 points to ":"
-        // Nombre:filename\r\n
+        // Nombre: filename\r\n
         idx = msg.find(NEWLINE);
-        value = slice(msg, idx2+1, idx);
+        value = slice(msg, idx2+2, idx);
         request_items[key] = value;
         return request_items;
     }
@@ -98,7 +98,7 @@ void answer_filelist(Socket::ptr sock){
     vector<string> files = get_files(SERVER_DIR);
 
     ss << OK << " " << FILELIST << NEWLINE;
-    ss << CANTIDAD << file_count << NEWLINE << NEWLINE;
+    ss << CANTIDAD << " " << file_count << NEWLINE << NEWLINE;
 
     for(auto &f : files){
         ss << f << NEWLINE;
@@ -110,13 +110,11 @@ void answer_filelist(Socket::ptr sock){
 void send_file(Socket::ptr sock, string file){
     stringstream ss;
     size_t bytes_written = 0;
-    //ToDo: send REAL size and md5sum
-    ss << SIZE << 1000 << NEWLINE;
-    ss << MD5 << "ae4bc071534fb8d0ae7eb2e6dc638266";
-    sock->send(ss.str());
+    size_t filesize = 0;
 
     file = SERVER_DIR + "/" + file;
 
+    debug("Opening file %s\n", file.c_str());
     int fd = open(file.c_str(), O_RDONLY);
 
     struct stat s;
@@ -124,9 +122,17 @@ void send_file(Socket::ptr sock, string file){
         cerr << "Could not stat file: " << file << endl;
         return;
     }
+    filesize = s.st_size;
+
+    //ToDo: send REAL md5sum
+    ss << OK << " " << GETFILE << NEWLINE;
+    ss << SIZE << " " << filesize << NEWLINE;
+    ss << MD5 << " " << "ae4bc071534fb8d0ae7eb2e6dc638266" << NEWLINE << NEWLINE;
+    debug("ss = \n%s\n", ss.str().c_str());
+    sock->send(ss.str());
 
     bytes_written = sendfile(sock->get_sockfd(), fd,
-                            NULL, s.st_size);
+                            NULL, filesize);
     if(bytes_written != (size_t)s.st_size){
         printerr("sendfile failed\n");
         reporterr(bytes_written, errno);

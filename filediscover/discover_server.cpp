@@ -36,9 +36,9 @@ int start_discover_server(int udp_port, int tcp_port){
     }
 
     stringstream msg;
-    msg << HI << name << NEWLINE;
-    msg << PUERTO << tcp_port << NEWLINE;
-    msg << ARCHIVOS << file_count << NEWLINE << NEWLINE;
+    msg << HI << " " << name << NEWLINE;
+    msg << PUERTO << " " << tcp_port << NEWLINE;
+    msg << ARCHIVOS << " " << file_count << NEWLINE << NEWLINE;
     cout << "UDP server on port " << udp_port << "..." << endl;
     while(1){
         string resp = udp_socket.recvfrom(response);

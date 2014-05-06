@@ -32,7 +32,9 @@ Commands:\n\
 Options\n\
     -t <timeout>    Timeout for discovery operations.\n\
     -p <tcp port>   TCP port to listen on. Defaults to 4444.\n\
-    -u <udp port>   UDP port to listen on. Defaults to 4444.";
+    -u <udp port>   UDP port to listen on. Defaults to 4444.\n\
+    -b <bdcast addr>\n\
+                    Address to broadcast to.";
 
 void print_help(){
     cout << args_help << endl;
@@ -53,6 +55,7 @@ int main(int argc, char *argv[]){
     int tcp_port = 4444;
     stringstream arg;
     string command;
+    string bdcast = "255.255.255.255";
     vector<string> posargs;
 
     if(argc < 2){
@@ -60,7 +63,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    while((c = getopt(argc, argv, "t:u:p:")) != -1){
+    while((c = getopt(argc, argv, "t:u:p:b:")) != -1){
         switch(c){
             case 't':
                 arg << optarg;
@@ -91,6 +94,9 @@ int main(int argc, char *argv[]){
                 }
                 arg.str("");
                 arg.clear();
+                break;
+            case 'b':
+                bdcast = optarg;
                 break;
             case 'h':
                 print_help();
@@ -130,7 +136,7 @@ int main(int argc, char *argv[]){
     }else if(command == "start-discover"){
         return start_discover_server(udp_port, tcp_port);
     }else if(command == "discover"){
-        return look_for_servers(udp_port, timeout);
+        return look_for_servers(bdcast, udp_port, timeout);
     }else if(command == "start-fileserver"){
         return start_fileserver(tcp_port);
     }else if(command == "listfiles"){
