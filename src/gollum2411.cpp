@@ -247,4 +247,22 @@ namespace gollum2411{
     {
 
     };
+
+    void write_to_ssl(SSL *ssl, string msg){
+        if(SSL_write(ssl, (void*)msg.c_str(), msg.length()) != (int)msg.length()){
+            throw socket_error("Failed writing to ssl");
+        }
+    }
+
+    string read_from_ssl(SSL *ssl){
+        char *buf = new char[BUFSIZE]();
+        if(SSL_read(ssl, buf, BUFSIZE) <= 0){
+            delete[] buf;
+            throw socket_error("Failed reading from ssl");
+        }
+        string s = buf;
+        delete[] buf;
+        return s;
+    }
+
 }

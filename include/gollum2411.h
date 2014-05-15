@@ -11,7 +11,12 @@
 
 #include <utils.h>
 
+const size_t BUFSIZE = 1024;
+
 namespace gollum2411{
+
+    const std::string NEWLINE = "\r\n";
+
     class Socket{
         public:
             Socket(int _domain, int _type, int _protocol);
@@ -48,6 +53,9 @@ namespace gollum2411{
         public:
             socket_error(const std::string& msg); /*!<Class constructor.*/
     };
+
+    void write_to_ssl(SSL *ssl, std::string msg);
+    std::string read_from_ssl(SSL *ssl);
 }
 
 #endif

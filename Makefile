@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS?=-I. -Wall -Werror -std=c++0x
+CFLAGS?=-I. -Wall -Werror -std=c++0x -lcrypto -lssl
 
 INCLUDES=-Iinclude -Iutils
 
@@ -7,7 +7,7 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -DDEBUG -g
 endif
 
-all : common utils filetransfer httpserver timeserver filediscover
+all : common utils filetransfer httpserver timeserver filediscover ssl
 
 #common
 srcdir=src/
@@ -100,6 +100,18 @@ $(filediscover_objdir) :
 $(filediscover_bindir) :
 	mkdir -p $@
 
+#ssl
+ssl_dir=ssl/
+ssl_libs=-lcrypto -lssl
+ssl_includes=-I$(ssl_dir)
+ssl_binlist=sslserver sslclient
+ssl:$(ssl_binlist)
+ssl_bins=$(addprefix $(ssl_dir),$(ssl_binlist))
+sslserver : $(ssl_dir)server.cpp $(ssl_dir)server.hpp $(common_objs) $(utils_objs)
+	$(CC) $(INCLUDES) $(CFLAGS) $(ssl_includes) $(ssl_libs) -o $(ssl_dir)$@ $< $(common_objs) $(utils_objs)
+sslclient : $(ssl_dir)client.cpp $(ssl_dir)client.hpp $(common_objs) $(utils_objs)
+	$(CC) $(INCLUDES) $(CFLAGS) $(ssl_includes) $(ssl_libs) -o $(ssl_dir)$@ $< $(common_objs) $(utils_objs)
+
 #doc
 docdir=doc/
 doxyfile = ./sock2014.dox
@@ -119,7 +131,8 @@ clean : cleandoc
 	    $(filetransfer_objdir) $(filetransfer_bindir) \
 	    $(httpserver_objdir) $(httpserver_bindir) \
 	    $(timeserver_objdir) $(timeserver_bindir) \
-	    $(filediscover_objdir) $(filediscover_bindir)
+	    $(filediscover_objdir) $(filediscover_bindir) \
+	    $(ssl_bins)
 
 
-.PHONY : all $(subprojs) common doc
+.PHONY : all $(subprojs) common doc sslserver sslc

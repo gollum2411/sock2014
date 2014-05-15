@@ -163,3 +163,23 @@ int get_file_count(string path){
     }
     else return (int)files.size();
 }
+
+string remove_newline(string s){
+    if(s.find("\r\n") != string::npos)
+        return slice(s, 0, s.find("\r\n"));
+    else
+        return s;
+}
+
+string basepath(string s){
+    //Commented for debug only
+    size_t idx = s.find_last_of("/\\");
+
+    // get basename only
+    if(idx != string::npos){
+        return slice(s, idx+1, s.length());
+    }else{
+        return s;
+    }
+
+}

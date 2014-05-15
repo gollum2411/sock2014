@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <time.h>
+#include <openssl/ssl.h>
 
 void printerr(const char* fmt, ...);
 void reporterr(int ret_val, int _errno);
@@ -26,6 +27,9 @@ std::string slice(std::string str, std::string::size_type start, std::string::si
 std::vector<std::string> get_files(std::string path);
 
 int get_file_count(std::string path);
+
+std::string remove_newline(std::string s);
+std::string basepath(std::string s);
 
 #define debug(fmt, ...) _debug(__FILE__, __LINE__, stdout, fmt, ##__VA_ARGS__)
 
